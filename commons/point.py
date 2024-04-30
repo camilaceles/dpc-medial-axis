@@ -1,5 +1,6 @@
 import numpy as np
 from numpy import ndarray as array
+from pygel3d import hmesh
 from scipy.spatial import KDTree
 
 
@@ -158,6 +159,7 @@ class PointSet:
         self.N: int = positions.shape[0]
         self.positions: array = np.copy(positions)
         self.normals: array = np.copy(normals) / np.linalg.norm(normals, axis=1, keepdims=True)
+        # self.mesh = mesh
 
         self.neighborhoods: list[array] = [np.empty(0)] * self.N
         self.is_fixed: array = np.zeros(self.N, dtype=bool)
@@ -194,6 +196,14 @@ class PointSet:
         for i, neighborhood in enumerate(neighborhoods):
             neighborhood.remove(i)
             self.neighborhoods[i] = np.array(neighborhood, dtype=int)
+
+    # def update_ring_neighborhood(self, depth: int = 2) -> None:
+    #     for vid in range(self.N):
+    #         nbhd = list(self.mesh.circulate_vertex(vid))
+    #         for _ in range(depth - 1):
+    #             for n in self.mesh.circulate_vertex(vid):
+    #                 nbhd += list(self.mesh.circulate_vertex(n))
+    #         self.neighborhoods[vid] = np.array(nbhd, dtype=int)
 
     def update_knn_neighborhood(self, n: int) -> None:
         kd = KDTree(self.positions)

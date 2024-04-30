@@ -1,5 +1,5 @@
 import plotly.graph_objs as go
-from pygel3d import hmesh
+from pygel3d import hmesh, jupyter_display as jd
 from numpy import array
 import numpy as np
 
@@ -8,7 +8,7 @@ camera = dict(
     center=dict(x=0, y=0, z=0),
     eye=dict(x=0, y=1.5, z=-2)
 )
-
+jd.display
 
 def __wireframe_plot_data(m):
     m_tri = hmesh.Manifold(m)
@@ -47,7 +47,8 @@ def display_mesh_pointset(m, points):
                              mode='markers',
                              marker_size=3,
                              line=dict(color='rgb(125,0,0)', width=1),
-                             name="pointset")
+                             name="pointset",
+                             text=list(range(len(m.vertices()))), hoverinfo='text')
 
     mesh_data = [wireframe, point_set]
     lyt = go.Layout(width=850, height=800)
@@ -171,9 +172,19 @@ def display_mesh(m, wireframe=True, smooth=True, color='#dddddd'):
     hmesh.triangulate(m_tri)
     ijk = array([[idx for idx in m_tri.circulate_face(f, 'v')] for f in m_tri.faces()])
     mesh = go.Mesh3d(x=xyz[:, 0], y=xyz[:, 1], z=xyz[:, 2],
-                     i=ijk[:, 0], j=ijk[:, 1], k=ijk[:, 2], color=color, flatshading=not smooth)
+                     i=ijk[:, 0], j=ijk[:, 1], k=ijk[:, 2], color=color, flatshading=not smooth,
+                     text=list(range(len(m.vertices()))), hoverinfo='text')
 
-    mesh_data = [mesh]
+    point_set = go.Scatter3d(x=xyz[:, 0],
+                             y=xyz[:, 1],
+                             z=xyz[:, 2],
+                             mode='markers',
+                             marker_size=1,
+                             line=dict(color='rgb(125,0,0)', width=1),
+                             name="pointset",
+                             text=list(range(len(m.vertices()))), hoverinfo='text')
+
+    mesh_data = [mesh, point_set]
     if wireframe:
         wireframe = __wireframe_plot_data(m)
         mesh_data += [wireframe]
@@ -198,7 +209,6 @@ def display_mesh(m, wireframe=True, smooth=True, color='#dddddd'):
 
 
 def display_highlight(m, outer_points, inner_points, vid):
-    mesh_data = []
     medial_axis = go.Scatter3d(x=np.array(inner_points.positions[vid, 0]),
                                y=np.array(inner_points.positions[vid, 1]),
                                z=np.array(inner_points.positions[vid, 2]),

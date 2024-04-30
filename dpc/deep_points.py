@@ -4,7 +4,7 @@ from .meso_skeleton_formation import form_meso_skeleton, regularize_curve_points
 from .inner_point_sinking import sink_inner_points
 
 
-def deep_points(m: hmesh.Manifold, params: dict):
+def deep_points(m: hmesh.Manifold, params: dict, just_sink=False):
     positions = m.positions()
     normals = np.array([m.vertex_normal(vid) for vid in m.vertices()])
 
@@ -13,6 +13,8 @@ def deep_points(m: hmesh.Manifold, params: dict):
 
     # step 1: sink inner points
     sink_inner_points(outer_points, inner_points, params)
+    if just_sink:
+        return outer_points, inner_points
 
     # step 2: form medial axis
     form_meso_skeleton(outer_points, inner_points, params)
